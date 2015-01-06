@@ -1,0 +1,70 @@
+2014-12-16 09:22:16,192 4591816704 vos-1.11.0fuse.__call__.845 -> getattr /lauren/temp/crap.txt (None,)
+2014-12-16 09:22:16,193 4591816704 vos-1.11.0vofs.getattr.414 getting attributes of /lauren/temp/crap.txt
+2014-12-16 09:22:16,193 4591816704 vos-1.11.0CadcCache.getAttr.520 gettattr /lauren/temp/crap.txt:
+2014-12-16 09:22:16,194 4591816704 vos-1.11.0vofs.getNode.391 force? -> False path -> /lauren/temp/crap.txt
+2014-12-16 09:22:16,194 4591816704 vos-1.11.0vofs.getNode.395 requesting node /lauren/temp/crap.txt from VOSpace
+2014-12-16 09:22:16,194 4591816704 vos-1.11.0vos.getNode.1246 Getting node /lauren/temp/crap.txt
+2014-12-16 09:22:16,194 4591816704 vos-1.11.0vos.getNode.1247 Node: /lauren/temp/crap.txt
+2014-12-16 09:22:16,195 4591816704 vos-1.11.0vos.fixURI.1218 Got value of args:
+2014-12-16 09:22:16,195 4591816704 vos-1.11.0fuse.__call__.854 <- getattr {'st_ctime': 1363467174.0, 'st_mtime': 1363467174.0, 'st_blocks': 10, 'st_gid': 20, 'st_nlink': 1, 'st_mode': 33277, 'st_size': 5252, 'st_atime': 1418750524.270379, 'st_uid': 501}
+2014-12-16 09:22:16,195 4611280896 vos-1.11.0fuse.__call__.845 -> getattr /lauren/temp/crap.txt (None,)
+2014-12-16 09:22:16,196 4611280896 vos-1.11.0vofs.getattr.414 getting attributes of /lauren/temp/crap.txt
+2014-12-16 09:22:16,196 4611280896 vos-1.11.0CadcCache.getAttr.520 gettattr /lauren/temp/crap.txt:
+2014-12-16 09:22:16,196 4611280896 vos-1.11.0vofs.getNode.391 force? -> False path -> /lauren/temp/crap.txt
+2014-12-16 09:22:16,197 4611280896 vos-1.11.0vofs.getNode.395 requesting node /lauren/temp/crap.txt from VOSpace
+2014-12-16 09:22:16,197 4611280896 vos-1.11.0vos.getNode.1246 Getting node /lauren/temp/crap.txt
+2014-12-16 09:22:16,197 4611280896 vos-1.11.0vos.getNode.1247 Node: /lauren/temp/crap.txt
+2014-12-16 09:22:16,197 4611280896 vos-1.11.0vos.fixURI.1218 Got value of args:
+2014-12-16 09:22:16,198 4611280896 vos-1.11.0fuse.__call__.854 <- getattr {'st_ctime': 1363467174.0, 'st_mtime': 1363467174.0, 'st_blocks': 10, 'st_gid': 20, 'st_nlink': 1, 'st_mode': 33277, 'st_size': 5252, 'st_atime': 1418750524.270379, 'st_uid': 501}
+2014-12-16 09:22:16,198 4610207744 vos-1.11.0fuse.__call__.845 -> open /lauren/temp/crap.txt (0,)
+2014-12-16 09:22:16,198 4610207744 vos-1.11.0vofs.open.463 Opening /lauren/temp/crap.txt with flags r
+2014-12-16 09:22:16,198 4610207744 vos-1.11.0CadcCache.getAttr.520 gettattr /lauren/temp/crap.txt:
+2014-12-16 09:22:16,199 4610207744 vos-1.11.0CadcCache.__init__.732 creating a new File Handle for /lauren/temp/crap.txt
+2014-12-16 09:22:16,200 4610207744 vos-1.11.0CadcCache.open.192 Opening file /lauren/temp/crap.txt: isnew False: id 4362021776
+2014-12-16 09:22:16,200 4610207744 vos-1.11.0CadcCache.readData.1174 Getting data: 0 0 None
+2014-12-16 09:22:16,205 4743790592 vos-1.11.0vofs.readFromBacking.80 reading range: None
+2014-12-16 09:22:16,205 4743790592 vos-1.11.0vofs.readFromBacking.84 Opening a new vo file on /lauren/temp/crap.txt
+2014-12-16 09:22:16,205 4743790592 vos-1.11.0vos.getNode.1246 Getting node /lauren/temp/crap.txt
+2014-12-16 09:22:16,206 4743790592 vos-1.11.0vos.getNode.1247 Node: /lauren/temp/crap.txt
+2014-12-16 09:22:16,206 4743790592 vos-1.11.0vos.fixURI.1218 Got value of args:
+2014-12-16 09:22:16,206 4743790592 vos-1.11.0vos.fixURI.1218 Got value of args:
+2014-12-16 09:22:16,207 4743790592 vos-1.11.0vos.getNodeURL.1315 Getting URL for: vos://cadc.nrc.ca!vospace/lauren/temp/crap.txt
+2014-12-16 09:22:16,207 4743790592 vos-1.11.0vos.getNodeURL.1325 do_shortcut=1 method=GET view=data
+2014-12-16 09:22:16,207 4743790592 vos-1.11.0vos.getNodeURL.1340 parts: [scheme: vos, netloc: cadc.nrc.ca!vospace, path: /lauren/temp/crap.txt]
+2014-12-16 09:22:16,207 4743790592 vos-1.11.0vos.getNodeURL.1369 URL: http://www.canfar.phys.uvic.ca
+2014-12-16 09:22:16,208 4743790592 vos-1.11.0vos.fixURI.1218 Got value of args:
+2014-12-16 09:22:16,208 4743790592 vos-1.11.0vos.get_connection.122 Trying to connect to http://www.canfar.phys.uvic.ca using None
+2014-12-16 09:22:16,208 4743790592 vos-1.11.0vos.get_connection.144 Opening the connection
+2014-12-16 09:22:16,822 4743790592 vos-1.11.0vos.getNodeURL.1410 Sending short cut url: http://uvic.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/transfer/bmVpZ2g9VVZJQyZzaWdleHA9MjAxNDEyMTYyMTIyMTYmYXJjPVZPU3BhYyZpZD0xMTY2NzU1MjUmdXNlcj1hbm9uVXNlciZucz1sYXVyZW4lMkZ0ZW1wJmF1dGhDb2RlPTAmcnVuSUQ9ejN2ODlhb29hemZnNm5wdyZ1cmw9aHR0cCUzQSUyRiUyRmFkc3RvcjIzJTNBODg4OCUyRmFyY2hpdmUlMkZkMjMlMkZ2b3NwYWMlMkZkZWZhdWx0JTJGZGVmYXVsdF8wMTE4JTJGMDAlMkYyMiUyRjcyJTJGMTE2Njc1NTI1JTI1M0IlMjUzQjExMDkyNDAwMCZzZXJ2aWNlVXJsPWh0dHAlM0ElMkYlMkZ3d3cuY2FuZmFyLnBoeXMudXZpYy5jYSUyRnZvc3BhY2UlMkZzeW5jdHJhbnMlM0ZUQVJHRVQlM0R2b3MlMjUzQSUyNTJGJTI1MkZjYWRjLm5yYy5jYSUyNTIxdm9zcGFjZSUyNTJGbGF1cmVuJTI1MkZ0ZW1wJTI1MkZjcmFwLnR4dCUyNkRJUkVDVElPTiUzRHB1bGxGcm9tVm9TcGFjZSUyNlBST1RPQ09MJTNEaXZvJTI1M0ElMjUyRiUyNTJGaXZvYS5uZXQlMjUyRnZvc3BhY2UlMjUyRmNvcmUlMjUyM2h0dHBnZXQlMjZ2aWV3JTNEZGF0YQ==-ZmlkPWNyYXAudHh0JmNsbj01MjUyJmNtZD1mNDNhZGY5OGQ3ZWJiOGM5NjFhNDU3YTY5Y2Q0YzE0NiZsbWQ9MTM2MzQ3MDc3NDg1Nw==-baa8eab170f7e346941fa434feb01e3e/crap.txt
+2014-12-16 09:22:16,822 4743790592 vos-1.11.0vos.open.776 Opening http://uvic.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/transfer/bmVpZ2g9VVZJQyZzaWdleHA9MjAxNDEyMTYyMTIyMTYmYXJjPVZPU3BhYyZpZD0xMTY2NzU1MjUmdXNlcj1hbm9uVXNlciZucz1sYXVyZW4lMkZ0ZW1wJmF1dGhDb2RlPTAmcnVuSUQ9ejN2ODlhb29hemZnNm5wdyZ1cmw9aHR0cCUzQSUyRiUyRmFkc3RvcjIzJTNBODg4OCUyRmFyY2hpdmUlMkZkMjMlMkZ2b3NwYWMlMkZkZWZhdWx0JTJGZGVmYXVsdF8wMTE4JTJGMDAlMkYyMiUyRjcyJTJGMTE2Njc1NTI1JTI1M0IlMjUzQjExMDkyNDAwMCZzZXJ2aWNlVXJsPWh0dHAlM0ElMkYlMkZ3d3cuY2FuZmFyLnBoeXMudXZpYy5jYSUyRnZvc3BhY2UlMkZzeW5jdHJhbnMlM0ZUQVJHRVQlM0R2b3MlMjUzQSUyNTJGJTI1MkZjYWRjLm5yYy5jYSUyNTIxdm9zcGFjZSUyNTJGbGF1cmVuJTI1MkZ0ZW1wJTI1MkZjcmFwLnR4dCUyNkRJUkVDVElPTiUzRHB1bGxGcm9tVm9TcGFjZSUyNlBST1RPQ09MJTNEaXZvJTI1M0ElMjUyRiUyNTJGaXZvYS5uZXQlMjUyRnZvc3BhY2UlMjUyRmNvcmUlMjUyM2h0dHBnZXQlMjZ2aWV3JTNEZGF0YQ==-ZmlkPWNyYXAudHh0JmNsbj01MjUyJmNtZD1mNDNhZGY5OGQ3ZWJiOGM5NjFhNDU3YTY5Y2Q0YzE0NiZsbWQ9MTM2MzQ3MDc3NDg1Nw==-baa8eab170f7e346941fa434feb01e3e/crap.txt (GET)
+2014-12-16 09:22:16,823 4743790592 vos-1.11.0vos.get_connection.122 Trying to connect to http://uvic.cadc-ccda.hia-iha.nrc-cnrc.gc.ca using None
+2014-12-16 09:22:16,823 4743790592 vos-1.11.0vos.get_connection.144 Opening the connection
+2014-12-16 09:22:17,269 4743790592 vos-1.11.0vofs.readFromBacking.96 reading from http://uvic.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/transfer/bmVpZ2g9VVZJQyZzaWdleHA9MjAxNDEyMTYyMTIyMTYmYXJjPVZPU3BhYyZpZD0xMTY2NzU1MjUmdXNlcj1hbm9uVXNlciZucz1sYXVyZW4lMkZ0ZW1wJmF1dGhDb2RlPTAmcnVuSUQ9ejN2ODlhb29hemZnNm5wdyZ1cmw9aHR0cCUzQSUyRiUyRmFkc3RvcjIzJTNBODg4OCUyRmFyY2hpdmUlMkZkMjMlMkZ2b3NwYWMlMkZkZWZhdWx0JTJGZGVmYXVsdF8wMTE4JTJGMDAlMkYyMiUyRjcyJTJGMTE2Njc1NTI1JTI1M0IlMjUzQjExMDkyNDAwMCZzZXJ2aWNlVXJsPWh0dHAlM0ElMkYlMkZ3d3cuY2FuZmFyLnBoeXMudXZpYy5jYSUyRnZvc3BhY2UlMkZzeW5jdHJhbnMlM0ZUQVJHRVQlM0R2b3MlMjUzQSUyNTJGJTI1MkZjYWRjLm5yYy5jYSUyNTIxdm9zcGFjZSUyNTJGbGF1cmVuJTI1MkZ0ZW1wJTI1MkZjcmFwLnR4dCUyNkRJUkVDVElPTiUzRHB1bGxGcm9tVm9TcGFjZSUyNlBST1RPQ09MJTNEaXZvJTI1M0ElMjUyRiUyNTJGaXZvYS5uZXQlMjUyRnZvc3BhY2UlMjUyRmNvcmUlMjUyM2h0dHBnZXQlMjZ2aWV3JTNEZGF0YQ==-ZmlkPWNyYXAudHh0JmNsbj01MjUyJmNtZD1mNDNhZGY5OGQ3ZWJiOGM5NjFhNDU3YTY5Y2Q0YzE0NiZsbWQ9MTM2MzQ3MDc3NDg1Nw==-baa8eab170f7e346941fa434feb01e3e/crap.txt
+2014-12-16 09:22:17,613 4743790592 vos-1.11.0vos.checkstatus.753 status 200 for URL http://uvic.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/transfer/bmVpZ2g9VVZJQyZzaWdleHA9MjAxNDEyMTYyMTIyMTYmYXJjPVZPU3BhYyZpZD0xMTY2NzU1MjUmdXNlcj1hbm9uVXNlciZucz1sYXVyZW4lMkZ0ZW1wJmF1dGhDb2RlPTAmcnVuSUQ9ejN2ODlhb29hemZnNm5wdyZ1cmw9aHR0cCUzQSUyRiUyRmFkc3RvcjIzJTNBODg4OCUyRmFyY2hpdmUlMkZkMjMlMkZ2b3NwYWMlMkZkZWZhdWx0JTJGZGVmYXVsdF8wMTE4JTJGMDAlMkYyMiUyRjcyJTJGMTE2Njc1NTI1JTI1M0IlMjUzQjExMDkyNDAwMCZzZXJ2aWNlVXJsPWh0dHAlM0ElMkYlMkZ3d3cuY2FuZmFyLnBoeXMudXZpYy5jYSUyRnZvc3BhY2UlMkZzeW5jdHJhbnMlM0ZUQVJHRVQlM0R2b3MlMjUzQSUyNTJGJTI1MkZjYWRjLm5yYy5jYSUyNTIxdm9zcGFjZSUyNTJGbGF1cmVuJTI1MkZ0ZW1wJTI1MkZjcmFwLnR4dCUyNkRJUkVDVElPTiUzRHB1bGxGcm9tVm9TcGFjZSUyNlBST1RPQ09MJTNEaXZvJTI1M0ElMjUyRiUyNTJGaXZvYS5uZXQlMjUyRnZvc3BhY2UlMjUyRmNvcmUlMjUyM2h0dHBnZXQlMjZ2aWV3JTNEZGF0YQ==-ZmlkPWNyYXAudHh0JmNsbj01MjUyJmNtZD1mNDNhZGY5OGQ3ZWJiOGM5NjFhNDU3YTY5Y2Q0YzE0NiZsbWQ9MTM2MzQ3MDc3NDg1Nw==-baa8eab170f7e346941fa434feb01e3e/crap.txt
+2014-12-16 09:22:17,614 4743790592 vos-1.11.0CadcCache.setHeader.779 size: 5252 md5: f43adf98d7ebb8c961a457a69cd4c146
+2014-12-16 09:22:17,614 4743790592 vos-1.11.0vofs.readFromBacking.122 Writing: 5252 bytes at 0 to cache for /lauren/temp/crap.txt
+2014-12-16 09:22:17,614 4743790592 vos-1.11.0vofs.readFromBacking.122 Writing: 0 bytes at 5252 to cache for /lauren/temp/crap.txt
+2014-12-16 09:22:17,615 4743790592 vos-1.11.0vofs.readFromBacking.138 Wrote: 5252 bytes to cache for /lauren/temp/crap.txt
+2014-12-16 09:22:17,615 4743790592 vos-1.11.0CadcCache.execute.1237 setFullyCached? False 0 None 5252
+2014-12-16 09:22:17,615 4743790592 vos-1.11.0CadcCache.execute.1244 setFullyCached
+2014-12-16 09:22:17,616 4743790592 vos-1.11.0CadcCache.execute.1267 read thread finished
+2014-12-16 09:22:17,616 4610207744 vos-1.11.0fuse.__call__.854 <- open 4316453328
+2014-12-16 09:22:17,617 4522545152 vos-1.11.0fuse.__call__.845 -> read /lauren/temp/crap.txt (5252L, 0, 4316453328L)
+2014-12-16 09:22:17,617 4522545152 vos-1.11.0vofs.read.561 reading range: /lauren/temp/crap.txt 5252 0 4316453328
+2014-12-16 09:22:17,617 4522545152 vos-1.11.0CadcCache.read.1022 reading 5252 bytes at 0
+2014-12-16 09:22:17,618 4522545152 vos-1.11.0fuse.__call__.854 <- read <ctypes.c_char_Array_5252 object at 0x1014a13b0>
+2014-12-16 09:22:17,618 4612890624 vos-1.11.0fuse.__call__.845 -> getattr /lauren/temp/crap.txt (None,)
+2014-12-16 09:22:17,618 4612890624 vos-1.11.0vofs.getattr.414 getting attributes of /lauren/temp/crap.txt
+2014-12-16 09:22:17,619 4612890624 vos-1.11.0CadcCache.getAttr.520 gettattr /lauren/temp/crap.txt:
+2014-12-16 09:22:17,619 4612890624 vos-1.11.0vofs.getNode.391 force? -> False path -> /lauren/temp/crap.txt
+2014-12-16 09:22:17,619 4612890624 vos-1.11.0vofs.getNode.395 requesting node /lauren/temp/crap.txt from VOSpace
+2014-12-16 09:22:17,619 4612890624 vos-1.11.0vos.getNode.1246 Getting node /lauren/temp/crap.txt
+2014-12-16 09:22:17,619 4612890624 vos-1.11.0vos.getNode.1247 Node: /lauren/temp/crap.txt
+2014-12-16 09:22:17,619 4612890624 vos-1.11.0vos.fixURI.1218 Got value of args:
+2014-12-16 09:22:17,620 4612890624 vos-1.11.0fuse.__call__.854 <- getattr {'st_ctime': 1363467174.0, 'st_mtime': 1363467174.0, 'st_blocks': 10, 'st_gid': 20, 'st_nlink': 1, 'st_mode': 33277, 'st_size': 5252, 'st_atime': 1418750524.270379, 'st_uid': 501}
+2014-12-16 09:22:17,620 4612354048 vos-1.11.0fuse.__call__.845 -> flush /lauren/temp/crap.txt (4316453328L,)
+2014-12-16 09:22:17,620 4612354048 vos-1.11.0fuse.__call__.854 <- flush 0
+2014-12-16 09:22:17,621 4611817472 vos-1.11.0fuse.__call__.845 -> release /lauren/temp/crap.txt (4316453328L,)
+2014-12-16 09:22:17,621 4611817472 vos-1.11.0vofs.release.632 releasing file 4316453328
+2014-12-16 09:22:17,621 4611817472 vos-1.11.0CadcCache.release.826 releasing node /lauren/temp/crap.txt: id 4362021776: refcount 1: modified False: obsolete: False
+2014-12-16 09:22:17,624 4611817472 vos-1.11.0fuse.__call__.854 <- release None
