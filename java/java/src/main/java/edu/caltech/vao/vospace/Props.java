@@ -7,7 +7,7 @@ public class Props {
 
     public enum Property { 
 	TITLE, CREATOR, SUBJECT, DESCRIPTION, PUBLISHER, CONTRIBUTOR, DATE, TYPE, FORMAT,
-	    IDENTIFIER, SOURCE, LANGUAGE, RELATION, COVERAGE, RIGHTS, AVAILABLE_SPACE, LENGTH
+	    IDENTIFIER, SOURCE, LANGUAGE, RELATION, COVERAGE, RIGHTS, AVAILABLE_SPACE, LENGTH, GROUPREAD, GROUPWRITE, ISPUBLIC
     }
     
     private static EnumMap<Property, String> propMap; 
@@ -31,6 +31,9 @@ public class Props {
 	propMap.put(Property.RIGHTS, "ivo://ivoa.net/vospace/core#rights");
 	propMap.put(Property.AVAILABLE_SPACE, "ivo://ivoa.net/vospace/core#availableSpace");
 	propMap.put(Property.LENGTH, "ivo://ivoa.net/vospace/core#length");
+	propMap.put(Property.GROUPREAD, "ivo://ivoa.net/vospace/core#groupread");
+	propMap.put(Property.GROUPWRITE, "ivo://ivoa.net/vospace/core#groupwrite");
+	propMap.put(Property.ISPUBLIC, "ivo://ivoa.net/vospace/core#ispublic");
     }
 
     public static String get(Property prop) {

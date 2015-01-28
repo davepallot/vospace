@@ -137,7 +137,7 @@ class Node:
     """A VOSpace node"""
 
     IVOAURL = "ivo://ivoa.net/vospace/core"
-    SERVURL = "ivo://datalab.noao.edu/vospace/core"
+    SERVURL = "ivo://nvo.caltech/vospace/core"
     ISLOCKED = SERVURL + "#islocked"
 
     VOSNS = "http://www.ivoa.net/xml/VOSpace/v2.0"
@@ -196,7 +196,6 @@ class Node:
 
     def update(self):
         """Update the convience links of this node as we update the xml file"""
-
         self.type = self.node.get(Node.TYPE)
         if self.type is None:
             # Nodes in container have no type set: MJG
@@ -234,7 +233,9 @@ class Node:
         data = []
         file = dummy()
         file.write = data.append
-        ElementTree.ElementTree(self.node).write(file, encoding="UTF-8")
+        # MJG - processing instruction causing XML handling issue on server
+#        ElementTree.ElementTree(self.node).write(file, encoding="UTF-8")
+        ElementTree.ElementTree(self.node).write(file)
         return "".join(data)
 
     def setattr(self, attr={}):
@@ -257,7 +258,7 @@ class Node:
             ### mktime is expecting a localtime but we're sending a UT date, so
             ### some correction will be needed
             # MJG: workaround to handle multiple time formats
-            mtime = time.mktime(time.strptime(sdate[0:19 - len(sdate)],
+            mtime = time.mktime(time.strptime(sdate[0:19],
                                               '%Y-%m-%dT%H:%M:%S'))
             mtime = mtime - time.mktime(time.gmtime()) + \
                     time.mktime(time.localtime())
@@ -284,9 +285,9 @@ class Node:
         st_mode |= stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR
 
         ## Set the GROUP permissions
-        if self.props.get('groupwrite', "NONE") != "NONE":
+        if self.props.get('groupwrite', 'false') != 'false':
             st_mode |= stat.S_IWGRP
-        if self.props.get('groupread', "NONE") != "NONE":
+        if self.props.get('groupread', 'false') != 'false':
             st_mode |= stat.S_IRGRP
             st_mode |= stat.S_IXGRP
 
@@ -297,6 +298,7 @@ class Node:
             st_mode |= stat.S_IROTH | stat.S_IXOTH
 
         self.attr['st_mode'] = attr.get('st_mode', st_mode)
+        logger.debug(self.attr['st_mode'])
 
         ## We set the owner and group bits to be those of the currently
         ## running process.
@@ -396,7 +398,7 @@ class Node:
                 if uri != prop.attrib.get('uri', None):
                     continue
                 found = True
-                changed = 1
+                changed = 1 # MJG: This seems wrong should be 0 at this stage
                 if value is None:
                     ## this is actually a delete property
                     prop.attrib['xsi:nil'] = 'true'
@@ -405,11 +407,12 @@ class Node:
                     self.props[self.getPropName(uri)] = None
                 else:
                     prop.text = value
-        #logger.debug("key %s changed? %s (1 == yes)" % (key, changed))
+        # logger.debug("key %s changed? %s (1 == yes)" % (key, changed))
+        logger.debug("Property %s now has value %s" % (key, value))
         if found or value is None:
             return changed
         ### must not have had this kind of property already, so set value
-        #logger.debug("Adding a property: %s" %(key))
+        # logger.debug("Adding a property: %s" %(key))
         propertyNode = ElementTree.SubElement(props, Node.PROPERTY)
         propertyNode.attrib['readOnly'] = "false"
         ### There should be a '#' in there someplace...
@@ -417,7 +420,7 @@ class Node:
         propertyNode.attrib['uri'] = uri
         propertyNode.text = value
         self.props[self.getPropName(uri)] = value
-        #logger.debug("After change node XML\n %s" %(self))
+        # logger.debug("After change node XML\n %s" %(self))
         return 1
 
     def chmod(self, mode):
@@ -436,8 +439,8 @@ class Node:
         else:
             changed += self.setPublic('false')
 
+        # MJG: 1/13/15 - changed to set explicit true/false
         if mode & (stat.S_IRGRP):
-
             changed += self.chrgrp(self.groupread)
         else:
             changed += self.chrgrp('')
@@ -539,7 +542,7 @@ class Node:
         # MJG 12/10/14 - if date is not set, set to None
         date = self.props.get('date', None)
         if date:
-          date = time.mktime(time.strptime(date[0:19 - len(date)], '%Y-%m-%dT%H:%M:%S'))
+          date = time.mktime(time.strptime(date[0:19], '%Y-%m-%dT%H:%M:%S'))
         # if date.tm_year==time.localtime().tm_year:
         #    dateString=time.strftime('%d %b %H:%S',date)
         #else:
@@ -561,6 +564,7 @@ class Node:
         if self.props.get('ispublic', "false") == "true":
             perm[-3] = 'r'
             perm[-2] = '-'
+        # MJG 01/13/15 - changed 'NONE' to 'false'
         writeGroup = self.props.get('groupwrite', 'NONE')
         if writeGroup != 'NONE':
             perm[5] = 'w'
@@ -654,7 +658,7 @@ class VOFile:
 
     def __init__(self, url_list, connector, method, size=None,
                  followRedirect=True, range=None, possible_partial_read=False):
-        logger.debug("HERE %s %s %s" % (url_list, method, size))
+        # logger.debug("HERE %s %s %s" % (url_list, method, size))
         # MJG: Fix URLs for non-GET calls
         if method != 'GET' and '?' in url_list:
             url_list = url_list[: url_list.rindex('?')]
@@ -952,8 +956,8 @@ class VOFile:
 class Client:
     """The Client object does the work"""
 
-    VOServers = {'datalab.noao.edu!vospace': SERVER,
-                 'datalab.noao.edu~vospace': SERVER}
+    VOServers = {'nvo.caltech!vospace': SERVER,
+                 'nvo.caltech~vospace': SERVER}
 
     VOTransfer = '/sync'
     VOProperties = '/vospace'
@@ -984,7 +988,7 @@ class Client:
         self.protocol = "http"
 
         self.conn = conn
-        self.VOSpaceServer = "datalab.noao.edu!vospace"
+        self.VOSpaceServer = "nvo.caltech!vospace"
         self.rootNode = rootNode
         self.nodeCache = NodeCache()
 
@@ -1246,8 +1250,8 @@ class Client:
                                       '%Y-%m-%dT%H:%M:%S GMT',
                                       time.strptime(header.resp.getheader('date', None),
                                                     '%a, %d %b %Y %H:%M:%S GMT')),
-                                  'groupwrite': None,
-                                  'groupread': None,
+                                  'groupwrite': 'None',
+                                  'groupread': 'None',
                                   'ispublic': URLparse(uri).scheme == 'https' and 'true' or 'false',
                                   'length': header.resp.getheader('content-length', 0)}
                     node = Node(node=uri, node_type=Node.DATA_NODE, properties=properties)
@@ -1601,7 +1605,7 @@ class Client:
         if URL is None:
             if target is not None:
                 logger.debug("%s is a link to %s" % (node.uri, target))
-                if (re.search("^vos\://datalab\.noao\.edu[!~]vospace", target)
+                if (re.search("^vos\://nvo\.caltech[!~]vospace", target)
                     is not None):
                     # TODO
                     # the above re.search should use generic VOSpace uri
@@ -1657,6 +1661,7 @@ class Client:
            recursive updates, node should only contain the properties to
            be changed in the node itself as well as all its children. """
         ## Let's do this update using the async tansfer method
+        # MJG - Why would you want do an update as an async transfer?
         URL = self.getNodeURL(node.uri)
         if recursive:
             propURL = "%s://%s%s" % (self.protocol, SERVER,
@@ -1673,7 +1678,9 @@ class Client:
             con.close()
             self.getTransferError(transURL, node.uri)
         else:
+            # HERE
             con = VOFile(URL, self.conn, method="POST", followRedirect=False)
+            logger.debug(str(node))
             con.write(str(node))
             con.read()
         return 0

@@ -209,7 +209,7 @@ public interface MetaStore {
     /*
      * Store a result associated with a Job
      */
-    public int addResult(String identifier, String result) throws SQLException;
+    public void addResult(String identifier, String result) throws SQLException;
 
    /*
      * Get a result associated with a Job
@@ -221,5 +221,27 @@ public interface MetaStore {
      */
     public String getNode(String identifier) throws SQLException;
 
+    /*
+     * Check the status of a capability (active or not)
+     */
+    public boolean isActive(String identifier, String capability) throws SQLException;
+
+
+    /*
+     * Set the status of a capability (active or not)
+     */
+    public void setActive(String identifier, String capability) throws SQLException;
+
+
+    /*
+     * Register the capabilities
+     */
+    public void registerCapability(String identifier, String capability) throws SQLException;
+
+
+    /**
+     * Check whether transfer associated with a Job exists
+     */
+    public boolean isTransfer(String identifier) throws SQLException;
 
 }

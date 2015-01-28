@@ -71,7 +71,13 @@ public class Node {
 		String[] values = node.xpath("/vos:node/vos:properties/vos:property[@uri = '" + uri + "']");
 		String[] nilSet = node.xpath("/vos:node/vos:properties/vos:property[@uri = '" + uri +"']/@xsi:nil");
 		// Add property to list if not nilled
-		if (values.length > 0 && nilSet.length == 0) properties.put(uri, values[0]);
+		if (nilSet.length == 0) {
+		    if (values.length > 0) {
+			properties.put(uri, values[0]);
+		    } else {
+			properties.put(uri, "");
+		    }
+		}
 	    }
 	    return properties;
 	} catch (Exception e) {
@@ -137,6 +143,21 @@ public class Node {
 	    node.addChild("/vos:node/vos:capabilities", node.PREFIX == null ? "<capability uri=\"" + value + "\"/>" : "<" + node.PREFIX + ":capability uri=\"" + value + "\"/>");
     }
 
+    
+    /**
+     * Get the capabilities set on the node
+     * @return any capabilities the node has set on it
+     */
+    public String[] getCapabilities() throws VOSpaceException {
+	try {
+	    String[] capUris = node.xpath("/vos:node/vos:capabilities/vos:capability/@uri");
+	    return capUris;
+	} catch (Exception e) {
+	    throw new VOSpaceException(VOSpaceException.INTERNAL_SERVER_ERROR, e);
+	}
+    }
+
+    
     /**
      * Add the item identified by the specified XPath expression
      * @param expression The XPath expression identifying where to add the item

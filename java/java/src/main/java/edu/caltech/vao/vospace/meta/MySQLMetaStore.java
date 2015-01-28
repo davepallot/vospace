@@ -49,7 +49,7 @@ public class MySQLMetaStore implements MetaStore{
 	    // Load the jdbc driver
             Class.forName("com.mysql.jdbc.Driver");
 	    // Enable logging
-	    DriverManager.setLogStream(System.err);
+	    DriverManager.setLogStream(null);
 	    // Connection URL
             DB_URL = props.containsKey("server.meta.dburl") ? props.getProperty("server.meta.dburl") : DEFAULT_DB_URL;
             DB_UID = props.containsKey("server.meta.dbuid") ? props.getProperty("server.meta.dbuid") : DEFAULT_DB_UID;
@@ -362,7 +362,8 @@ public class MySQLMetaStore implements MetaStore{
 	Statement statement = getConnection().createStatement();
 	if (metadata instanceof String) {
 	    String node = updateProperties((String) metadata);
-	    String query = "update nodes set node = '" + node + "' where identifier = '" + identifier + "'"; 
+	    String encode = node.replace("\"", "'");
+	    String query = "update nodes set node = \"" + encode + "\" where identifier = '" + identifier + "'";
 	    statement.executeUpdate(query);
 	}
     }
@@ -614,8 +615,38 @@ public class MySQLMetaStore implements MetaStore{
 	if (result.next()) readOnly = result.getBoolean(1);
 	return readOnly;
     }
-    
 
+    /*
+     * Check the status of a capability (active or not)
+     */
+    public boolean isActive(String identifier, String capability) throws SQLException {
+	boolean isActive = false;
+	String query = "select active from capabilities where identifier = '" + identifier + "' and capability = '" + capability + "'";
+	ResultSet result = execute(query);
+	if (result.next()) isActive = result.getBoolean(1);
+	return isActive;
+    }
+
+
+    /*
+     * Set the status of a capability (active or not)
+     */
+    public void setActive(String identifier, String capability) throws SQLException {
+	String query = "update capabilities set active = 1 where identifier = '" + identifier + "' and capability = '" + capability + "'";
+	ResultSet result = execute(query);
+    }
+
+
+    /*
+     * Register the capabilities
+     */
+    public void registerCapability(String identifier, String capability) throws SQLException {
+	Statement statement = getConnection().createStatement();
+	String query = "insert capabilities values('" + identifier + "', '" + capability + "', 0)";
+	statement.executeUpdate(query);
+    }
+
+    
     /*
      * Execute a query on the store
      */
@@ -686,13 +717,13 @@ public class MySQLMetaStore implements MetaStore{
      * @param identifier The job identifier
      * @param result The result associated with the job
      */
-    public int addResult(String identifier, String result) throws SQLException {
+    public void addResult(String identifier, String result) throws SQLException {
 	Statement statement = getConnection().createStatement();
 	String query = "insert into results (identifier, details) values ('" + identifier + "', '" + result + "')";
-	int success = statement.executeUpdate(query);
-	return success;
+	statement.executeUpdate(query);
     }
 
+    
     /**
      * Get a result associated with a Job
      * @param identifier The job identifier
@@ -701,11 +732,23 @@ public class MySQLMetaStore implements MetaStore{
     public String getResult(String identifier) throws SQLException {
 	String details = null;
 	Statement statement = getConnection().createStatement();
-	String query = "select details from results where identifier =  '" + identifier + "'";
+	String query = "select details from results where identifier = '" + identifier + "'";
 	ResultSet result = execute(query);
 	if (result.next()) details = result.getString(1);
 	return details;
     }
 
 
+    /**
+     * Check whether transfer associated with a Job exists
+     */
+    public boolean isTransfer(String identifier) throws SQLException {
+        String query = "select identifier from transfers where jobid = '" + identifier + "'";
+	ResultSet result = execute(query);
+	if (result.next()) {
+	    return true;
+	} else {
+	    return false;
+	}	
+    }
 }

@@ -52,7 +52,7 @@ STRUCTUREDDATANODE = 'vos:StructuredDataNode'
 CONTAINERNODE = 'vos:ContainerNode'
 
 #SCHEMA_ROOT = 'http://www.ivoa.net/xml/VOSpace/VOSpace-v2.0.xsd'
-SCHEMA_ROOT = '/Users/mjg/Projects/noao/vospace/vospace-2.0/python/VOSpace-v2.0.xsd'
+SCHEMA_ROOT = '/Users/mjg/Projects/repos/vospace/python/VOSpace-v2.0.xsd'
 
 UWS_NS = "http://www.ivoa.net/xml/UWS/v1.0"
 VOS_NS = "http://www.ivoa.net/xml/VOSpace/v2.0"
@@ -75,10 +75,11 @@ def suite():
 #  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(SetNodeTestCase))
 ##  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(GetNodeTestCase))
 #  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(FindNodesTestCase))
-  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(PushToVoSpaceTestCase))
+#  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(PushToVoSpaceTestCase))
 #  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(PullToVoSpaceTestCase))
 #  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(PullFromVoSpaceTestCase))
   #  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(PushFromVoSpaceTestCase))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(CapabilityTestCase))
   return suite
 
 def set_node_uri(node, uri):
@@ -1748,6 +1749,55 @@ class PushFromVoSpaceTestCase(unittest.TestCase):
     test_uws(self.h, 'transfers', etree.tostring(self.transfer), fail = True, summary = 'Host name may not be null')  
 
 
+class CapabilityTestCase(unittest.TestCase):
+
+  def setUp(self):
+    """
+    Initialize the test case
+    """
+    self.h = httplib2.Http()
+    self.transfer = etree.parse('test/transfer.xml')
+
+    
+  def handleTransfer(self, target, fileName):
+    set_transfer_target(self.transfer, ROOT_NODE + target)
+    set_transfer_direction(self.transfer, 'pushToVoSpace')
+    set_transfer_view(self.transfer, 'ivo://ivoa.net/vospace/core#votable')
+    set_transfer_protocol(self.transfer, 'ivo://ivoa.net/vospace/core#httpput')
+    # Submit job
+    resp, content = self.h.request(BASE_URI + "sync", 'POST', body = etree.tostring(self.transfer), headers={'Content-type': 'application/x-www-form-urlencoded'})
+    location = resp['location']
+    while int(resp['status']) != 200:
+      resp, content = self.h.request(location)
+    jobid = resp['content-location'].split('/')[6]
+    transfer = Transfer(content)
+    for protocol in transfer.protocols:
+      if protocol.uri == 'ivo://ivoa.net/vospace/core#httpput':
+        file = open(fileName).read()
+        resp, content = self.h.request(protocol.endpoint, 'PUT', body = file, headers={'Content-type': 'application/xml', 'Content-Length': str(len(file))})
+    # Check for job completing (wait for timeout on transfer completion check)
+    count = 0
+    while content not in ['COMPLETED', 'ERROR'] and count < 30:
+      resp, content = self.h.request(BASE_URI + 'transfers/%s/phase' % jobid)
+      self.assertEqual(int(resp['status']), 200)
+      sleep(1)
+      count += 1
+    resp, content = self.h.request(BASE_URI + 'transfers/%s' % jobid)
+    job = Job(content)
+    assert job.phase == 'COMPLETED'
+
+    
+  def testTableIngester(self):
+    """
+    Test a table ingestion capability defined on a container
+    """
+    # Create container
+    create_container(self.h, "testcon")
+    # Activate capability
+    self.handleTransfer('/testcon/tableingester_cap.conf', 'test/tableingester_cap.conf')
+    # Transfer file
+    self.handleTransfer('/testcon/test.vot', 'test/burbidge.vot')
+    
 
 if __name__ == '__main__':
   suite = suite()

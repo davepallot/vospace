@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 public class VOSpaceResource {
 
     protected final VOSpaceManager manager;
-    private final String PROPFILE = "/Users/mjg/Projects/noao/vospace/vospace-2.0/java/vospace.properties";
+    private final String PROPFILE = "/Users/mjg/Projects/repos/vospace/java/java/vospace.properties";
 
     public VOSpaceResource() throws VOSpaceException {
 	// Get property file

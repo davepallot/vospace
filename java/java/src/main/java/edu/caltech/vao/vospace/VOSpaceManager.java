@@ -24,6 +24,7 @@ import javax.xml.stream.events.XMLEvent;
 import org.codehaus.stax2.XMLStreamReader2;
 
 import edu.caltech.vao.vospace.meta.*;
+import edu.caltech.vao.vospace.capability.Capability;
 import edu.caltech.vao.vospace.protocol.ProtocolHandler;
 import edu.caltech.vao.vospace.storage.StorageManager;
 import edu.caltech.vao.vospace.storage.StorageManagerFactory;
@@ -50,7 +51,8 @@ public class VOSpaceManager {
     protected ArrayList<Views.View> SPACE_PROVIDES_IMAGE;
     protected ArrayList<Views.View> SPACE_PROVIDES_TABLE;
     protected ArrayList<Views.View> SPACE_PROVIDES_ARCHIVE;
-    protected ArrayList<Capabilities.Capability> SPACE_CAPABILITIES;
+    protected ArrayList<Capability> SPACE_CAPABILITIES;
+    protected HashMap<String, Capability> CAPABILITIES;
 
     protected ArrayList<Protocol> SPACE_CLIENT_PROTOCOLS;
     protected ArrayList<Protocol> SPACE_SERVER_PROTOCOLS;
@@ -97,9 +99,10 @@ public class VOSpaceManager {
             SPACE_PROVIDES_IMAGE = getViewList(props.getProperty("space.provides.image"));
             SPACE_PROVIDES_TABLE = getViewList(props.getProperty("space.provides.table"));
             SPACE_PROVIDES_ARCHIVE = getViewList(props.getProperty("space.provides.archive"));
-	    SPACE_CAPABILITIES = getCapabilityList(props.getProperty("space.capabilities"));
+//	    SPACE_CAPABILITIES = getCapabilityList(props.getProperty("space.capabilities"));
             SPACE_AUTH = props.containsKey("space.identifier") ? getId(props.getProperty("space.identifier")) : "vos://nvo.caltech!vospace";
 	    registerProtocols(props);
+	    registerCapabilities(props);
             // Set metadata store
 	    MetaStoreFactory factory = MetaStoreFactory.getInstance(propFile);
 	    String storeType = props.getProperty("store.type");
@@ -135,7 +138,7 @@ public class VOSpaceManager {
 	if (!validParent(uri)) throw new VOSpaceException(VOSpaceException.BAD_REQUEST, "The requested URI is invalid - bad parent."); 
 	try {
 	    // Does node already exist?
-	    boolean exists = store.isStored(uri);
+ 	    boolean exists = store.isStored(uri);
 	    if (exists && !overwrite) throw new VOSpaceException(VOSpaceException.CONFLICT, "A Node already exists with the requested URI"); 
 	    // Check specified node type 
 	    if (exists) {
@@ -190,8 +193,10 @@ public class VOSpaceManager {
 		}
 		// Set capabilities
 		if (SPACE_CAPABILITIES.size() > 0) {
-		    for (Capabilities.Capability cap: SPACE_CAPABILITIES) {
-			datanode.addCapabilities(Capabilities.get(cap));
+		    for (Capability cap: SPACE_CAPABILITIES) {
+			if (cap.getApplicability().contains(type)) {
+			    datanode.addCapabilities(cap.getUri());
+			}
 		    }
 		}
 	    }
@@ -204,13 +209,22 @@ public class VOSpaceManager {
 		}
 	    }
 	    // Set properties (date at least)
-	    node.setProperty(Props.get(Props.Property.DATE), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()));
-//	    node.setProperty(Props.get(Props.Property.LENGTH), Long.toString(backend.size(getLocation(node.getUri()))));
+	    if (!exists) {
+		node.setProperty(Props.get(Props.Property.DATE), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()));
+		node.setProperty(Props.get(Props.Property.GROUPREAD), "");
+		node.setProperty(Props.get(Props.Property.GROUPWRITE), "");
+		node.setProperty(Props.get(Props.Property.ISPUBLIC), "true");
+		node.setProperty(Props.get(Props.Property.LENGTH), "0");
+		//	    node.setProperty(Props.get(Props.Property.LENGTH), Long.toString(backend.size(getLocation(node.getUri()))));
+	    }
 	    // Store node
 	    if (exists) {
 		store.updateData(uri, node.toString());
 	    } else {
 		store.storeData(uri, type.ordinal(), USER, getLocation(uri), node.toString());
+		for (String capUri: node.getCapabilities()) {
+		    store.registerCapability(uri, capUri);
+		}
 	    }
 	    if (type.equals(NodeType.CONTAINER_NODE) && !exists) {
 		// boolean success = (new File(new URI(getLocation(node.getUri())))).mkdir();
@@ -255,11 +269,13 @@ public class VOSpaceManager {
 		} else {
 		    if (node instanceof ContainerNode) {
 			ContainerNode container = (ContainerNode) node;
+			// Get children and check length property
 			for (String child: store.getChildren(identifier)) {
 			    Node cnode = nfactory.getNode(store.getNode(child));
-			    if (!cnode.has("/vos:node/vos:properties/vos:property[@uri = \"" + Props.get(Props.Property.LENGTH) + "\"]")) {
-				cnode.setProperty(Props.get(Props.Property.LENGTH), Long.toString(backend.size(getLocation(cnode.getUri()))));
-			    }
+//			    if (!cnode.has("/vos:node/vos:properties/vos:property[@uri = \"" + Props.get(Props.Property.LENGTH) + "\"]")) {
+//				cnode.setProperty(Props.get(Props.Property.LENGTH), Long.toString(backend.size(getLocation(cnode.getUri()))));
+//			    }
+			    cnode = setLength(cnode);
 			    container.addNode(cnode.toString());
 //			    String type = NodeType.getUriById(store.getType(child));
 //			    container.addNode(child, type);
@@ -268,7 +284,8 @@ public class VOSpaceManager {
 		    }
 		}
 		// Set properties
-		node.setProperty(Props.get(Props.Property.LENGTH), Long.toString(backend.size(getLocation(node.getUri()))));
+		node = setLength(node);
+//		node.setProperty(Props.get(Props.Property.LENGTH), Long.toString(backend.size(getLocation(node.getUri()))));
 		return node;
 	    } else {
 		throw new VOSpaceException(VOSpaceException.NOT_FOUND, "A Node does not exist with the requested URI");
@@ -277,7 +294,25 @@ public class VOSpaceManager {
 	    throw new VOSpaceException(VOSpaceException.INTERNAL_SERVER_ERROR, e);
 	}
     }
-     
+
+
+    /**
+     * Set the length property on the specified node
+     */
+    public Node setLength(Node node) throws VOSpaceException {
+	String length = Props.get(Props.Property.LENGTH);
+	String lengthUri = "/vos:node/vos:properties/vos:property[@uri = \"" + length + "\"]";
+	boolean setLength = false;
+	if (!node.has(lengthUri)) {
+	    setLength = true;
+	} else if (node.get(lengthUri)[0].equals("0")) {
+	    setLength = true;
+	}
+	if (setLength) node.setProperty(length, Long.toString(backend.size(getLocation(node.getUri()))));
+	return node;
+    }
+
+
     /** 
      * Delete the specified node
      * @param nodeid The identifier of the node to be deleted
@@ -515,6 +550,26 @@ public class VOSpaceManager {
 	}
     } 
 
+    /**
+     * Register a set of capabilities
+     * @param props The property file containing details of the capabilities and their implementation
+     */
+    private void registerCapabilities(Properties props) throws VOSpaceException {
+        try {
+	    CAPABILITIES = new HashMap<String, Capability>();
+	    SPACE_CAPABILITIES = new ArrayList<Capability>();
+            String[] capabilities = props.getProperty("space.capabilities").split(",");
+            for (String capability : capabilities) {
+      	        String capabilityClass = props.getProperty("space.capability." + capability.trim());
+                Capability capImpl = (Capability) Class.forName(capabilityClass).newInstance();
+		CAPABILITIES.put(capImpl.getUri(), capImpl);
+		SPACE_CAPABILITIES.add(capImpl);
+            }
+        } catch (Exception e) {
+	    throw new VOSpaceException(VOSpaceException.INTERNAL_SERVER_ERROR, e);
+	}
+    } 
+    
     protected StorageManager getStorageManager() {
 	return backend;
     }

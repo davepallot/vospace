@@ -28,6 +28,7 @@ import uws.job.ExecutionPhase;
 
 import edu.caltech.vao.vospace.meta.MetaStore;
 import edu.caltech.vao.vospace.meta.MetaStoreFactory;
+import edu.caltech.vao.vospace.capability.Capability;
 import edu.caltech.vao.vospace.protocol.ProtocolHandler;
 import edu.caltech.vao.vospace.storage.StorageManager;
 import edu.caltech.vao.vospace.storage.StorageManagerFactory;
@@ -194,17 +195,30 @@ public class TransferJob extends JobThread {
 		}
 
 		// Loop activity
+		String jobId = getJobId();
 		while (!isInterrupted() && !status) {
 		    try {
 			Thread.sleep(1000);
 			if (direction.equals("pushToVoSpace")) {
-			    status = checkLocation(file, startInstance);
+//			    status = checkLocation(file, startInstance);
+			    status = store.isCompleted(jobId);
 			} else if (direction.equals("pullFromVoSpace")) {
 			    status = checkTime(startInstance);
 			} 
-		    } catch (VOSpaceException e) {
-			throw new UWSException(e.getStatusCode(), e.getMessage());
-		    }
+		    } catch (SQLException e) {
+			throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e);
+		    } 
+		}
+
+		// Update length property for pushToVoSpace
+		if (direction.equals("pushToVoSpace")) {
+		    try {
+			Node node = getNode(target);
+			node = manager.setLength(node);
+			store.updateData(target, node.toString());
+		    } catch (SQLException e) {
+			throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e);
+		    } 
 		}
 	    }
 
@@ -217,29 +231,41 @@ public class TransferJob extends JobThread {
 	    }
 	}
 	
+	// Check whether any capabilities need to be triggered
+	Node parent = getNode(target.substring(0, target.lastIndexOf("/")));
+	if (!direction.equals("pushFromVoSpace") && !direction.equals("pullFromVoSpace")) {
+	    try {
+		for (String capability: parent.getCapabilities()) {
+		    if (store.isActive(parent.getUri(), capability)) {
+			trigger(target, capability);
+		    }
+		    // Does this need to wait for any capabilities to finish?
+		}
+	    } catch (SQLException e) {
+		throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e);
+	    } catch (VOSpaceException e) {
+		throw new UWSException(e.getStatusCode(), e.getMessage());	          }  
+	}
+
+	// Check whether capability enabled - assumes naming convention
+	// for capability configuration file
+	if (target.endsWith("cap.conf")) {
+	    String shortCap = target.substring(target.lastIndexOf("/") + 1, target.lastIndexOf("cap.conf") - 1);
+	    try {
+		for (String capability: parent.getCapabilities()) {
+		    if (capability.endsWith(shortCap)) {
+			store.setActive(parent.getUri(), capability);
+		    }
+		}
+	    } catch (SQLException e) {
+		throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e);
+	    } catch (VOSpaceException e) {
+		throw new UWSException(e.getStatusCode(), e.getMessage());	          }  
+	}
+
 	if (isInterrupted()) {
 	    throw new InterruptedException();
 	}
-
-	/*
-	// Write the result file
-	try{
-	    // Create the result:
-	    Result result = createResult("Report");	// here, put the result name you want ; this name will be used to identify the result in the job description
-
-	    // Write the result:
-	    BufferedOutputStream output = new BufferedOutputStream(getResultOutput(result));
-	    output.write((executionTime + " seconds elapsed").getBytes());
-	    output.close();
-
-	    // Add it to the results list of this job:
-	    publishResult(result);
-
-	} catch (IOException e){
-	    // If there is an error, encapsulate it in an UWSException so that an error summary can be published:
-	    throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e, "Impossible to write the result file of the Job " + job.getJobId() + " !", ErrorType.TRANSIENT);
-	}
-	*/
     }
 
     public void clearResources() {
@@ -273,7 +299,7 @@ public class TransferJob extends JobThread {
 	    setNodeStatus(node, STATUS_BUSY);
 	    // Add to results
 	    if (target.endsWith(".auto")) transfer.setTarget(uri);
-	    store.addResult(getJobId(), transfer.toString());    
+	    store.addResult(getJobId(), transfer.toString());  
 	    if (target.endsWith(".auto")) {
 		getJob().addResult(new Result(getJob(), "nodeDetails", manager.BASE_URL + "nodes/" + uri.substring(uri.lastIndexOf("/") + 1)));
 	    }
@@ -339,7 +365,7 @@ public class TransferJob extends JobThread {
 	    // Register transfer endpoints
 	    registerEndpoint();
 	    // Add to results
-	    int success = store.addResult(getJobId(), transfer.toString());
+	    store.addResult(getJobId(), transfer.toString());
 	    getJob().addResult(new Result(getJob(), "transferDetails", manager.BASE_URL + "transfers/" + getJobId() + "/results/transferDetails"));
 	} catch (Exception e) {
 	    throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e);
@@ -436,7 +462,7 @@ public class TransferJob extends JobThread {
 		// Update metadata
 		for (String child: store.getAllChildren(target)) {
 		    // Update uri
-		    Node childNode = manager.getNode(child, "max");
+		    Node childNode = manager.getNode(child, "max", 1);
 		    childNode.setUri(child.replace(target, direction));
 		    // Get new location
 		    newLocation = getLocation(childNode.getUri());
@@ -493,7 +519,7 @@ public class TransferJob extends JobThread {
 		// Update metadata
 		for (String child: store.getAllChildren(target)) {
 		    // Update uri
-		    Node childNode = manager.getNode(child, "max");
+		    Node childNode = manager.getNode(child, "max", 1);
 		    childNode.setUri(child.replace(target, direction));
 		    // Get new location
 		    newLocation = getLocation(childNode.getUri());
@@ -683,7 +709,6 @@ public class TransferJob extends JobThread {
     }
     
 
-
     /**
      * Perform the transfer using the negotiated protocols
      * @param node The node associated with the data transfer
@@ -705,6 +730,22 @@ public class TransferJob extends JobThread {
 	    throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, e);
 	}	
 	if (!success) throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, "None of the requested protocols was successful");
+    }
+
+
+    /**
+     * Trigger the specified capability on the specified container
+     * @param identifier The identifier of the target node
+     * @param capability The identifier of the parent capability to trigger
+     */
+    private void trigger(String identifier, String capability) throws UWSException {
+	try {
+	    Capability cap = manager.CAPABILITIES.get(capability);
+	    cap.invoke(getLocation(identifier));
+	} catch (Exception e) {
+	    e.printStackTrace(System.err);
+	    throw new UWSException(UWSException.INTERNAL_SERVER_ERROR, "The capability " + capability + " was unable to complete on node " + identifier);
+	}
     }
 
 }

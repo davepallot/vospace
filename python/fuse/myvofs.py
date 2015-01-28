@@ -311,6 +311,9 @@ class VOFS(LoggingMixIn, Operations):
             try:
                 self.client.update(node)
                 self.getNode(path, force=True)
+                # MJG: Any changes only currently come into effect when the
+                # next mount happens
+                vos.logger.debug("%s %s" % (mode, self.getattr(path)['st_mode']))
             except Exception as e:
                 vos.logger.debug(str(e))
                 vos.logger.debug(type(e))

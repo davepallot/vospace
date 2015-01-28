@@ -10,10 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.httpclient.ChunkedInputStream;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.Channels;
-import java.nio.ByteBuffer;
 import java.io.ByteArrayOutputStream;
 
 import edu.caltech.vao.vospace.VOSpaceException;

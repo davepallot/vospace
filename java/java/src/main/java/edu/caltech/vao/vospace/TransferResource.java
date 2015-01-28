@@ -145,8 +145,16 @@ public class TransferResource extends VOSpaceResource {
     public String getResultsDetails(@Context HttpServletRequest req, @Context HttpServletResponse resp, @PathParam("jobid") String id) throws VOSpaceException {
         try {
             MetaStore store = MetaStoreFactory.getInstance().getMetaStore();
-            String details = store.getResult(id);
-            return details;
+	    String details = null;
+	    // Check whether transfer exists in db yet
+	    while (!store.isTransfer(id)) Thread.sleep(10);
+	    // Get details - loop if necessary (db latency issues)
+	    details = store.getResult(id);
+	    while (details == null) {
+		Thread.sleep(10);
+		details = store.getResult(id);
+	    }
+	    return details;
         } catch (Exception e) {
             throw new VOSpaceException(VOSpaceException.INTERNAL_SERVER_ERROR, e);
         }    
